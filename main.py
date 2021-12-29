@@ -14,12 +14,12 @@ num_frames = 150
 # All GIFs inside this directory get combined into one numpy array
 directory_path = '/home/vossi/Documents/Master_Thesis/WebScraping/Scraped_Data/Image_Sequences/'
 # Output file will be a numpy array .npy file
-output_file = "/home/vossi/Documents/Master_Thesis/WebScraping/Scraped_Data/output_array"
-
+output_file = "/home/vossi/Documents/Master_Thesis/WebScraping/Scraped_Data/numpy_arrays/numpy_array"
+batch_size = 50
 
 def convert():
     directory_contents = os.listdir(directory_path)
-
+    batch = 0
     dataset = []
     for idx, item in enumerate(directory_contents):
         if os.path.isdir(directory_path + item):
@@ -42,13 +42,16 @@ def convert():
                 gif_list = list(islice(cycle(gif_list), num_frames))
             dataset.append(gif_list)
 
-    # Turn list into numpy array
-    dataset = np.array(dataset)
-    for i in range(len(dataset)):
-        dataset[i] = np.array(dataset[i])
+        if idx > 0 and idx % batch_size == 0:
+            # Turn list into numpy array
+            dataset = np.array(dataset)
+            for i in range(len(dataset)):
+                dataset[i] = np.array(dataset[i])
 
-    np.save(output_file, dataset, allow_pickle=True, fix_imports=True)
-    print(f"Created numpy array of shape: {dataset.shape}")
+            np.save(output_file + str(batch), dataset, allow_pickle=True, fix_imports=True)
+            print(f"Created numpy array of shape: {dataset.shape}")
+            dataset = []
+            batch += 1
 
 
 if __name__ == '__main__':
